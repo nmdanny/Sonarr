@@ -245,6 +245,8 @@
     <Compile Include="Tags\TagModule.cs" />
     <Compile Include="Tags\TagResource.cs" />
     <Compile Include="TinyIoCNancyBootstrapper.cs" />
+    <Compile Include="Trakt\TraktCredentialsModule.cs" />
+    <Compile Include="Trakt\TraktCredentialsResource.cs" />
     <Compile Include="Update\UpdateModule.cs" />
     <Compile Include="Update\UpdateResource.cs" />
     <Compile Include="Validation\RssSyncIntervalValidator.cs" />
