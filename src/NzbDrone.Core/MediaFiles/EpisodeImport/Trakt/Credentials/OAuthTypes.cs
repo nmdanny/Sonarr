@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt
+namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials
 {
     // TODO: maybe use a proper oauth2 library instead? 
     public class OAuthCodeExchangeRequest

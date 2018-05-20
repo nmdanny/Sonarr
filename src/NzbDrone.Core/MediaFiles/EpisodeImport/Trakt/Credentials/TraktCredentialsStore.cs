@@ -3,7 +3,7 @@ using NLog;
 using NzbDrone.Common.Http;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Common.Serializer;
-namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt
+namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials
 {
     /// <summary>
     /// <para>Manages credentials used for Trakt API. In order to get fully usable credentials, call these methods in the
@@ -17,6 +17,7 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt
         TraktCredentials AddTraktCredentials(string clientId, string clientSecret, string userName);
         void UpdateOAuthTokens(string codeOrRefresh, bool doRefresh);
         TraktCredentials GetTraktCredentials();
+        void EnsureFreshCredentialsAvailable();
         void DeleteExistingCredentials();
         bool HasCredentials { get; }
 
@@ -152,6 +153,8 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt
                 creds.RefreshToken = tokens.RefreshToken;
                 var lastRefreshTime = new DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc).AddSeconds(tokens.CreatedAt);
                 creds.LastRefreshDate = lastRefreshTime;
+                creds.ExpirationDate = lastRefreshTime.AddSeconds(tokens.ExpiresIn);
+
                 cfgItem.Value = creds.ToJson();
                 cfgRepo.Update(cfgItem);
                 logger.Info($"Successfully {(doRefresh ? "refreshed": "filled")} OAuth credentials for Trakt");
@@ -184,7 +187,25 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt
             // TODO: find neater way of detecting the hostname
             return $"http://localhost:{port}/api/traktcredentials/oauth?apikey={api_key}";
         }
-        
+
+        public void EnsureFreshCredentialsAvailable()
+        {
+            if (!HasCredentials)
+            {
+                throw new MissingTraktCredentials();
+            }
+            var creds = GetTraktCredentials();
+            if (creds.LastRefreshDate < creds.ExpirationDate)
+            {
+                logger.Debug("Trakt credentials are fresh, no need to do anything");
+                return;
+            } else
+            {
+                logger.Debug("Trakt OAuth2 access token expired, getting a new one.");
+                UpdateOAuthTokens(creds.RefreshToken, true);
+            }
+    
+        }
     }
 
 }

@@ -10,13 +10,14 @@ using FluentValidation.Results;
 using System.Collections.Generic;
 using NLog;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
-namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt
+namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials
 {
     /// <summary>
     /// Credentials for using the Trakt API
     /// </summary>
-    public struct TraktCredentials : IProviderConfig
+    public class TraktCredentials : IProviderConfig
     {
         [FieldDefinition(0, Label = "Client ID")]
         public string ClientId { get; set; }
@@ -30,8 +31,12 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt
         [FieldDefinition(4, Label = "OAuth Refresh Token", Advanced = true)]
         public string RefreshToken { get; set; }
 
-        [FieldDefinition(5, Label = "OAuth Last Refresh Date", Advanced = true)]
         public DateTime? LastRefreshDate { get; set; }
+        public DateTime? ExpirationDate { get; set; }
+
+        public WatchSources WatchSources { get; set; } = WatchSources.Recommended;
+        public MonitorBehavior MonitorBehavior { get; set; } = MonitorBehavior.TraktOnly;
+
 
         private static readonly AbstractValidator<TraktCredentials> Validator = new CredentialsValidation();
 
@@ -59,5 +64,24 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt
             });
 
         }
+    }
+
+    [Flags, JsonConverter(typeof(StringEnumConverter))]
+    public enum WatchSources
+    {
+        None = 0,
+        Recommended = 1,
+        Watched = 2,
+        Collected = 4,
+        Anticipated = 8,
+        All = 1 | 2 | 4 | 8
+    }
+
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum MonitorBehavior
+    {
+        None,
+        TraktOnly,
+        All
     }
 }
