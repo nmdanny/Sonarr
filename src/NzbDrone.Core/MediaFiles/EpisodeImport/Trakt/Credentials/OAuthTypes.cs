@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,59 +10,59 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials
     // TODO: maybe use a proper oauth2 library instead? 
     public class OAuthCodeExchangeRequest
     {
-        [JsonProperty(PropertyName = "code")]
+        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public string Code { get; set; }
 
-        [JsonProperty(PropertyName = "client_id")]
+        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public string ClientId { get; set; }
 
-        [JsonProperty(PropertyName = "client_secret")]
+        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public string ClientSecret { get; set; }
 
-        [JsonProperty(PropertyName = "redirect_uri")]
+        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public string RedirectUri { get; set; }
 
-        [JsonProperty(PropertyName = "grant_type")]
+        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public string GrantType { get => "authorization_code"; }
     }
 
     public class OAuthAccessRefreshRequest
     {
-        [JsonProperty(PropertyName = "refresh_token")]
+        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public string RefreshToken { get; set; }
 
-        [JsonProperty(PropertyName = "client_id")]
+        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public string ClientId { get; set; }
 
-        [JsonProperty(PropertyName = "client_secret")]
+        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public string ClientSecret { get; set; }
 
-        [JsonProperty(PropertyName = "redirect_uri")]
+        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public string RedirectUri { get; set; }
 
-        [JsonProperty(PropertyName = "grant_type")]
+        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public string GrantType { get => "refresh_token"; }
     }
 
 
     public class OAuthTokensResponse
     {
-        [JsonProperty(PropertyName = "access_token")]
+        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public string AccessToken { get; set; }
 
-        [JsonProperty(PropertyName = "token_type")]
+        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public string TokenType { get; set; }
 
-        [JsonProperty(PropertyName = "expires_in")]
+        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public long ExpiresIn { get; set; }
 
-        [JsonProperty(PropertyName = "refresh_token")]
+        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public string RefreshToken { get; set; }
 
-        [JsonProperty(PropertyName = "scope")]
+        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public string Scope { get; set; }
 
-        [JsonProperty(PropertyName = "created_at")]
+        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public long CreatedAt { get; set; }
 
     }
