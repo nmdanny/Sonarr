@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System;
 using NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials;
-using NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.API;
 using NzbDrone.Api.Extensions;
 using NLog;
 using NzbDrone.Api.REST;
@@ -22,7 +21,7 @@ namespace NzbDrone.Api.Trakt
         private readonly Logger logger;
         private static readonly ResourceValidator<TraktCredentialsResource> validator = new TraktCredentialsResourceValidator();
 
-        public TraktCredentialsModule(ITraktCredentialsStore credStore, Logger logger, ITraktService service) : base()
+        public TraktCredentialsModule(ITraktCredentialsStore credStore, Logger logger) : base()
         {
             this.credStore = credStore;
             this.logger = logger;

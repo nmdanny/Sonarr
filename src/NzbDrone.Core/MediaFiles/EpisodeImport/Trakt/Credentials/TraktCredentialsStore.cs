@@ -24,6 +24,16 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials
 
     }
 
+    public class TraktCredentialsObjectStoreS : ObjectStore<TraktCredentials>
+    {
+        public TraktCredentialsObjectStoreS(IConfigRepository repo) : base(repo)
+        {
+
+        }
+
+        protected override string ConfigKey => "trakt_credentials";
+    }
+
     public class TraktCredentialsStore : ITraktCredentialsStore
     {
         private readonly IHttpClient http;
@@ -34,7 +44,7 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials
         private readonly string API_URL = "https://api.trakt.tv";
         private readonly string API_VERSION = "2";
 
-        private readonly string CONFIG_KEY = "traktcredentials";
+        private readonly string CONFIG_KEY = "trakt_credentials";
 
         public TraktCredentialsStore(IHttpClient http, Logger logger, IConfigRepository cfg, IConfigFileProvider cfgFileProvider)
         {
