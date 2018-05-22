@@ -1,0 +1,103 @@
+using NzbDrone.Common.Serializer;
+
+namespace NzbDrone.Core.Configuration
+{
+    /// <summary>
+    /// Similar in idea to <see cref="IBasicRepository{TModel}"/>, but with either 0 or 1 object that is JSON serialized
+    /// and stored in the config table.
+    /// </summary>
+    /// <typeparam name="T">The type of object you wish to persist</typeparam>
+    public abstract class ConfigObjectStore<T> where T : class, new()
+    {
+        private readonly IConfigRepository repo;
+
+        private T _object = null;
+        public ConfigObjectStore(IConfigRepository repo) {
+            this.repo = repo;
+            Load();
+        }
+
+        /// <summary>
+        /// A unique database identifier for the object.
+        /// </summary>
+        protected abstract string ConfigKey { get; }
+
+        /// <summary>
+        /// <para>Getter - Gets the object from memory, or null if it doesn't exist.</para>
+        /// <para>Setter - Sets the in-memory object and persists it to database, or erasing it if null.</para>
+        /// </summary>
+        public T Item
+        {
+            get
+            {
+                return _object;
+            }
+            set
+            {
+                _object = value;
+                if (_object == null)
+                {
+                    Erase();
+                } else
+                {
+                    Save();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Tries loading the object from the database into memory. Automatically called when
+        /// the store is initialized.
+        /// </summary>
+        /// <returns>Whether the object was loaded/existed in the database</returns>
+        public bool Load()
+        {
+            var cfgItem = repo.Get(ConfigKey);
+            if (cfgItem != null)
+            {
+                _object = Json.Deserialize<T>(cfgItem.Value);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Persists the in-memory object to database. If it's null, it will be erased.
+        /// </summary>
+        public void Save()
+        {
+            if (_object == null)
+            {
+                Erase();
+                return;
+            }
+            var cfgItem = repo.Get(ConfigKey);
+            if (cfgItem == null)
+            {
+                cfgItem = repo.Insert(new Config()
+                {
+                    Key = ConfigKey,
+                    Value = _object.ToJson()
+                });
+            } else
+            {
+                cfgItem.Value = _object.ToJson();
+                repo.Update(cfgItem);
+            }
+        }
+
+        /// <summary>
+        /// Deletes the object from the database. Equivalent to setting 'Item' to null.
+        /// </summary>
+        public void Erase()
+        {
+            _object = null;
+            var cfgItem = repo.Get(ConfigKey);
+            if (cfgItem != null)
+            {
+                repo.Delete(cfgItem);
+            }
+        }
+
+    }
+}

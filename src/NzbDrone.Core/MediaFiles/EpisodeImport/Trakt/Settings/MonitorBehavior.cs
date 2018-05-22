@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials
+namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Settings
 {
     /// <summary>
     /// What kind of shows do we want to be managed via Trakt?

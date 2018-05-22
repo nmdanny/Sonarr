@@ -65,5 +65,8 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials
         [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public long CreatedAt { get; set; }
 
+        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
+        public string State { get; set; }
+
     }
 }

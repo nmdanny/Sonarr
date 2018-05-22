@@ -1,4 +1,4 @@
-﻿namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials
+namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Settings
 {
     /// <summary>
     /// What kind of shows shall be automatically imported via Trakt?

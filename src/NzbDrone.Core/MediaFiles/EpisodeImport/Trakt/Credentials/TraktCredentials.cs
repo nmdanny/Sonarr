@@ -9,37 +9,21 @@ using NzbDrone.Core.Annotations;
 using FluentValidation.Results;
 using System.Collections.Generic;
 using NLog;
+using System.Net;
 
 namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials
 {
     /// <summary>
-    /// Credentials for using the Trakt API
+    /// Credentials needed for the Trakt API
     /// </summary>
-    public class TraktCredentials : IProviderConfig
+    public class TraktCredentials
     { 
-        // Credentials
-
-        [FieldDefinition(0, Label = "Client ID")]
         public string ClientId { get; set; }
-        [FieldDefinition(1, Label = "Client Secret")]
         public string Secret { get; set; }
-        [FieldDefinition(2, Label = "Username")]
-        public string Username { get; set; }
-
-        [FieldDefinition(3, Label = "OAuth Access Token", Advanced = true)]
         public string AccessToken { get; set; }
-        [FieldDefinition(4, Label = "OAuth Refresh Token", Advanced = true)]
         public string RefreshToken { get; set; }
-
         public DateTime? LastRefreshDate { get; set; }
         public DateTime? ExpirationDate { get; set; }
-
-        // Settings
-
-        public TraktSources MonitorSources { get; set; } = TraktSources.All;
-        public MonitorBehavior MonitorBehavior { get; set; } = MonitorBehavior.TraktOnly;
-        public TraktSources ImportSources { get; set; } = TraktSources.Watched;
-        public ImportConditions ImportConditions { get; set; } = ImportConditions.UnseenEpisodes;
 
         public static readonly TraktCredentialsValidator Validator = new TraktCredentialsValidator();
 
@@ -54,7 +38,6 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials
         {
             RuleFor(creds => creds.ClientId).NotEmpty();
             RuleFor(creds => creds.Secret).NotEmpty();
-            RuleFor(creds => creds.Username).NotEmpty();
 
             RuleFor(creds => creds.AccessToken).NotEmpty();
             RuleFor(creds => creds.RefreshToken).NotEmpty();

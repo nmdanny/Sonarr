@@ -9,13 +9,12 @@ namespace NzbDrone.Api.Trakt
     {
         public string ClientId { get; set; }
         public string Secret { get; set; }
-        public string Username { get; set; }
 
         public string AccessToken { get; set; }
         public string RefreshToken { get; set; }
 
         public DateTime? LastRefreshDate { get; set; }
-
+        public DateTime? ExpirationDate { get; set; }
     }
 
     public class TraktCredentialsResourceValidator : ResourceValidator<TraktCredentialsResource>
@@ -24,14 +23,7 @@ namespace NzbDrone.Api.Trakt
         {
             RuleFor(creds => creds.ClientId).NotEmpty();
             RuleFor(creds => creds.Secret).NotEmpty();
-            RuleFor(creds => creds.Username).NotEmpty();
-
-            When(creds => !String.IsNullOrEmpty(creds.AccessToken), () =>
-            {
-                RuleFor(creds => creds.AccessToken).NotEmpty();
-                RuleFor(creds => creds.RefreshToken).NotEmpty();
-                RuleFor(creds => creds.LastRefreshDate).NotNull().LessThanOrEqualTo(DateTime.Now);
-            });
+            
         }
     }
 
@@ -43,11 +35,12 @@ namespace NzbDrone.Api.Trakt
             {
                 ClientId = creds.ClientId,
                 Secret = creds.Secret,
-                Username = creds.Username,
                 AccessToken = creds.AccessToken,
                 RefreshToken = creds.RefreshToken,
-                LastRefreshDate = creds.LastRefreshDate
-            };
+                LastRefreshDate = creds.LastRefreshDate,
+                ExpirationDate = creds.ExpirationDate
+
+    };
         }
         public static TraktCredentialsResource ToResource(this TraktCredentials creds)
         {
@@ -55,10 +48,10 @@ namespace NzbDrone.Api.Trakt
             {
                 ClientId = creds.ClientId,
                 Secret = creds.Secret,
-                Username = creds.Username,
                 AccessToken = creds.AccessToken,
                 RefreshToken = creds.RefreshToken,
-                LastRefreshDate = creds.LastRefreshDate
+                LastRefreshDate = creds.LastRefreshDate,
+                ExpirationDate = creds.ExpirationDate
             };
         }
     }

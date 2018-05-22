@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials
+namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Settings
 {
     /// <summary>
     /// What kind of Trakt sources shall a certain behavior apply to?

@@ -16,9 +16,12 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.API
         [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public int Number { get; set; }
 
-
         [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public TraktIDs Ids { get; set; }
 
+        public override string ToString()
+        {
+            return $"{Title ?? "Unknown Episode"} - S{Season}E{Number}";
+        }
     }
 }

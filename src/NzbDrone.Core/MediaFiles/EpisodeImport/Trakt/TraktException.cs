@@ -24,7 +24,7 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt
 
     public class InvalidCredentialsException : TraktException
     {
-        public InvalidCredentialsException(string detail): base($"Failed to connect to Trakt due to invalid credentials: {detail}") { }
+        public InvalidCredentialsException(string detail): base($"Invalid Trakt credentials: {detail}") { }
     }
     public class TraktCredentialsAlreadyExist : TraktException
     {

@@ -1,4 +1,4 @@
-using NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials;
+using NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Settings;
 
 namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.API
 {

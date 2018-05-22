@@ -1,5 +1,5 @@
 using NzbDrone.Core.Lifecycle;
-using NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials;
+using NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Settings;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
 using System;
@@ -21,6 +21,7 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt
         {
             manageCommandQueue.Push(new Commands.TraktImportCommand(ImportConditions.UnseenEpisodes,
                 TraktSources.Watched, true, "D:\\Shows", 1));
+
         }
     }
 }

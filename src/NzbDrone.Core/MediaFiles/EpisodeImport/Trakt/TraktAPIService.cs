@@ -8,6 +8,7 @@ using NLog;
 using NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.API;
 using NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials;
 using System.Threading.Tasks;
+using NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Settings;
 
 namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt
 {
@@ -41,61 +42,51 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt
     }
     public class TraktAPIService: ITraktAPIService
     {
-        private readonly ITraktCredentialsStore credStore;
+        private readonly ITraktCredentialsManager credStore;
         private readonly IHttpClient http;
         private readonly Logger logger;
-
+        private readonly OAuthStateCrypto oauthStateCrypto;
         private readonly TraktCredentials credentials;
-        private readonly string API_URL = "https://api.trakt.tv";
-        private readonly string API_VERSION = "2";
+        private readonly TraktAPIHelper helper;
 
-
-        public TraktAPIService(ITraktCredentialsStore credStore, IHttpClient http, Logger logger)
+        public TraktAPIService(ITraktCredentialsManager credStore, IHttpClient http, Logger logger, TraktAPIHelper helper,
+            OAuthStateCrypto oauthStateCrypto)
         {
             this.credStore = credStore;
             this.http = http;
-            credStore.EnsureFreshCredentialsAvailable();
             this.credentials = credStore.GetTraktCredentials();
             this.logger = logger;
-        }
-        private HttpRequest PrepareTraktRequest(TraktCredentials creds, string path, HttpMethod method = HttpMethod.GET)
-        {
-            var k = new HttpRequestBuilder(API_URL);
-            var req = new HttpRequest($"{API_URL}/{path.Trim('/')}");
-            req.Headers.ContentType = "application/json";
-            req.Headers.Add("trakt-api-version", API_VERSION);
-            req.Headers.Add("trakt-api-key", creds.ClientId);
-            req.Headers.Add("Authorization", $"Bearer {creds.AccessToken}");
-            req.Method = method;
-            return req;
+            this.helper = helper;
+            this.oauthStateCrypto = oauthStateCrypto;
+            credStore.EnsureFreshCredentialsAvailable();
         }
         private IEnumerable<WatchlistShow> FetchWatchlistShows()
         {
-            var req = PrepareTraktRequest(credentials, "/users/me/watchlist/shows");
+            var req = helper.PrepareTraktRequest(credentials, "/users/me/watchlist/shows");
             return http.Get<List<WatchlistShow>>(req).Resource;
         }
 
         private IEnumerable<WatchedShow> FetchWatchedShows()
         {
-            var req = PrepareTraktRequest(credentials, "/users/me/watched/shows");
+            var req = helper.PrepareTraktRequest(credentials, "/users/me/watched/shows");
             return http.Get<List<WatchedShow>>(req).Resource;
         }
         private IEnumerable<CollectedShow> FetchCollectedShows()
         {
-            var req = PrepareTraktRequest(credentials, "/users/me/collection/shows");
+            var req = helper.PrepareTraktRequest(credentials, "/users/me/collection/shows");
             return http.Get<List<CollectedShow>>(req).Resource;
         }
 
         private IEnumerable<RecommendedShow> FetchRecommendedShows(int count)
         {
-            var req = PrepareTraktRequest(credentials, $"/recommendations/shows?limit={count}");
+            var req = helper.PrepareTraktRequest(credentials, $"/recommendations/shows?limit={count}");
             return http.Get<List<RecommendedShow>>(req).Resource;
 
         }
 
         public WatchedProgress FetchWatchedProgress(string traktId, bool includeSpecials)
         {
-            var req = PrepareTraktRequest(credentials, $"/shows/{traktId}/progress/watched");
+            var req = helper.PrepareTraktRequest(credentials, $"/shows/{traktId}/progress/watched");
             req.Url.AddQueryParam("specials", includeSpecials);
             return http.Get<WatchedProgress>(req).Resource;
         }

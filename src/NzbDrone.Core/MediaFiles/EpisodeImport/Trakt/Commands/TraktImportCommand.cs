@@ -1,5 +1,6 @@
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials;
+using NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Settings;
 using NzbDrone.Core.Messaging.Commands;
 using System;
 using System.Collections.Generic;
@@ -19,9 +20,9 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Commands
             ProfileId = profileId;
         }
 
-        public ImportConditions ImportConditions { get; set; } = ImportConditions.UnseenEpisodes;
-        public TraktSources ImportFrom { get; set; } = TraktSources.Watched & TraktSources.Watchlist;
-        public bool IncludeSpecials { get; set; } = true;
+        public ImportConditions ImportConditions { get; set; }
+        public TraktSources ImportFrom;
+        public bool IncludeSpecials { get; set; }
         public string RootFolderPath { get; set; }
         public int ProfileId { get; set; }
 
