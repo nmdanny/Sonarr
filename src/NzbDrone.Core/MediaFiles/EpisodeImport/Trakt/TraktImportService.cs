@@ -49,7 +49,7 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt
                 IncludeSpecials = message.IncludeSpecials,
                 MonitorBehavior = MonitorBehavior.All,
                 MonitorFollowingSeasons = true,
-                MaxMonitorPerSeries = 10
+                MaxMonitorPerSeries = Int32.MaxValue
             }, priority: CommandPriority.High);
         }
 

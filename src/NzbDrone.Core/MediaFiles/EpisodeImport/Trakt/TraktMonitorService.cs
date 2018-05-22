@@ -47,12 +47,16 @@ namespace NzbDrone.Core.MediaFiles.EpisodeImport.Trakt
         private void ApplyMonitoringRules(Series series, Episode unseenEpisode, int maxMonitorings, bool includeFollowingSeasons)
         {
             var allEpisodes = episodeService.GetEpisodeBySeries(series.Id);
-            var seenEpisodes = allEpisodes.Where(e => e.AbsoluteEpisodeNumber < unseenEpisode.AbsoluteEpisodeNumber);
-            var toMonitor = allEpisodes.Where(e =>
-                includeFollowingSeasons ? e.AbsoluteEpisodeNumber >= unseenEpisode.AbsoluteEpisodeNumber
-                                        : e.SeasonNumber == unseenEpisode.SeasonNumber && e.EpisodeNumber >= unseenEpisode.EpisodeNumber
-            ).Take(maxMonitorings);
-            logger.Debug($"Out of {allEpisodes.Count} episodes for {series}, we have seen(unmonitor) {seenEpisodes.Count()} episodes and " +
+
+            var seenEpisodes = allEpisodes.Where(e =>  e.SeasonNumber  < unseenEpisode.SeasonNumber
+                                                   || (e.SeasonNumber == unseenEpisode.SeasonNumber &&
+                                                       e.EpisodeNumber < unseenEpisode.EpisodeNumber));
+
+            var toMonitor = allEpisodes.Except(seenEpisodes)
+                                       .Where(e => includeFollowingSeasons ? true : e.SeasonNumber == unseenEpisode.SeasonNumber)
+                                       .Take(maxMonitorings);
+
+            logger.Debug($"Out of {allEpisodes.Count()} episodes for {series}, we have seen(unmonitor) {seenEpisodes.Count()} episodes and " +
                          $"have to monitor a total of {toMonitor.Count()} episodes");
             foreach (var seen in seenEpisodes)
             {
