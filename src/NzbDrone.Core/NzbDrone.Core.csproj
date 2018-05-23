@@ -823,35 +823,35 @@
     <Compile Include="MediaFiles\EpisodeImport\Specifications\SameEpisodesImportSpecification.cs" />
     <Compile Include="MediaFiles\EpisodeImport\Specifications\UnverifiedSceneNumberingSpecification.cs" />
     <Compile Include="MediaFiles\EpisodeImport\Specifications\UpgradeSpecification.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\API\CollectedShow.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\API\Episode.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\API\ISourcedShow.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\API\ITraktMediaObject.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\API\RecommendedShow.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\API\Show.cs" />
+    <Compile Include="TraktIntegration\API\CollectedShow.cs" />
+    <Compile Include="TraktIntegration\API\Episode.cs" />
+    <Compile Include="TraktIntegration\API\ISourcedShow.cs" />
+    <Compile Include="TraktIntegration\API\ITraktMediaObject.cs" />
+    <Compile Include="TraktIntegration\API\RecommendedShow.cs" />
+    <Compile Include="TraktIntegration\API\Show.cs" />
     <Compile Include="Configuration\ConfigObjectStore.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\API\TraktAPIHelper.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\Commands\TraktMonitorCommand.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\Credentials\OAuthState.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\Credentials\OAuthStateCrypto.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\Credentials\TraktCredentialsManager.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\Settings\ImportConditions.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\Settings\MonitorBehavior.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\Settings\TraktSources.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\ImportOnStart.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\TraktAPIConverter.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\TraktAPIService.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\API\Watched.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\API\WatchedProgress.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\API\WatchlistShow.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\Commands\TraktImportCommand.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\Credentials\OAuthTypes.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\Credentials\TraktCredentials.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\TraktException.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\API\TraktIDs.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\TraktImportService.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\Settings\TraktSettings.cs" />
-    <Compile Include="MediaFiles\EpisodeImport\Trakt\TraktMonitorService.cs" />
+    <Compile Include="TraktIntegration\API\TraktAPIHelper.cs" />
+    <Compile Include="TraktIntegration\Commands\TraktMonitorCommand.cs" />
+    <Compile Include="TraktIntegration\Credentials\OAuthState.cs" />
+    <Compile Include="TraktIntegration\Credentials\OAuthStateCrypto.cs" />
+    <Compile Include="TraktIntegration\Credentials\TraktCredentialsManager.cs" />
+    <Compile Include="TraktIntegration\Settings\ImportConditions.cs" />
+    <Compile Include="TraktIntegration\Settings\MonitorBehavior.cs" />
+    <Compile Include="TraktIntegration\Settings\TraktSources.cs" />
+    <Compile Include="TraktIntegration\ImportOnStart.cs" />
+    <Compile Include="TraktIntegration\TraktAPIConverter.cs" />
+    <Compile Include="TraktIntegration\TraktAPIService.cs" />
+    <Compile Include="TraktIntegration\API\Watched.cs" />
+    <Compile Include="TraktIntegration\API\WatchedProgress.cs" />
+    <Compile Include="TraktIntegration\API\WatchlistShow.cs" />
+    <Compile Include="TraktIntegration\Commands\TraktImportCommand.cs" />
+    <Compile Include="TraktIntegration\Credentials\OAuthTypes.cs" />
+    <Compile Include="TraktIntegration\Credentials\TraktCredentials.cs" />
+    <Compile Include="TraktIntegration\TraktException.cs" />
+    <Compile Include="TraktIntegration\API\TraktIDs.cs" />
+    <Compile Include="TraktIntegration\TraktImportService.cs" />
+    <Compile Include="TraktIntegration\Settings\TraktSettings.cs" />
+    <Compile Include="TraktIntegration\TraktMonitorService.cs" />
     <Compile Include="MediaFiles\Events\EpisodeFileAddedEvent.cs" />
     <Compile Include="MediaFiles\Events\EpisodeFileRenamedEvent.cs" />
     <Compile Include="MediaFiles\Events\EpisodeFileDeletedEvent.cs" />
@@ -1326,7 +1326,9 @@
     </Content>
     <Compile Include="Notifications\Telegram\TelegramError.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="MediaFiles\EpisodeImport\Trakt\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

@@ -4,12 +4,12 @@ using System.Collections;
 using System.Linq;
 using System.Text;
 using System;
-using NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials;
+using NzbDrone.Core.TraktIntegration.Credentials;
 using NzbDrone.Api.Extensions;
 using NLog;
 using NzbDrone.Api.REST;
-using NzbDrone.Core.MediaFiles.EpisodeImport.Trakt;
-using NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.API;
+using NzbDrone.Core.TraktIntegration;
+using NzbDrone.Core.TraktIntegration.API;
 using NzbDrone.Common.Serializer;
 using NzbDrone.Common.Http;
 
@@ -74,7 +74,10 @@ namespace NzbDrone.Api.Trakt
         {
             if (!credStore.HasCredentials)
             {
-                throw new MissingTraktCredentials();
+                return new TraktCredentialsResource()
+                {
+
+                };
             }
             var model = credStore.GetTraktCredentials();
             return model.ToResource();

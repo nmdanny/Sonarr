@@ -1,7 +1,7 @@
 using System;
 using FluentValidation;
 using NzbDrone.Api.REST;
-using NzbDrone.Core.MediaFiles.EpisodeImport.Trakt.Credentials;
+using NzbDrone.Core.TraktIntegration.Credentials;
 
 namespace NzbDrone.Api.Trakt
 {
