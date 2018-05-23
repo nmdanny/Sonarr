@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using NzbDrone.Core.TraktIntegration.Settings;
 
-namespace NzbDrone.Core.TraktIntegration.API
+namespace NzbDrone.Core.TraktIntegration.API.Types
 {
     public class RecommendedShow : Show, ISourcedShow
     {

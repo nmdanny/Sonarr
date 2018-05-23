@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NzbDrone.Core.TraktIntegration.API
+namespace NzbDrone.Core.TraktIntegration.API.Types
 {
     public class WatchedProgress
     {

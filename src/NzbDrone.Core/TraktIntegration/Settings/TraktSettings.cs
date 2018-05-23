@@ -26,6 +26,8 @@ namespace NzbDrone.Core.TraktIntegration.Settings
 
         public string DefaultRootFolder { get; set; }
         public int DefaultProfileId { get; set; }
+        public bool IncludeSpecials { get; set; }
+
     }
 
     public class TraktSettingsValidator: AbstractValidator<TraktSettings>

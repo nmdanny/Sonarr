@@ -5,17 +5,11 @@ using Newtonsoft.Json.Converters;
 namespace NzbDrone.Core.TraktIntegration.Settings
 {
     /// <summary>
-    /// What kind of Trakt sources shall a certain behavior apply to?
-    /// Note, this enum is a bitfield.
+    /// A flags enum indicating which Trakt sources/lists to use.
     /// </summary>
     [Flags, JsonConverter(typeof(StringEnumConverter))]
     public enum TraktSources
     {
-        /// <summary>
-        /// None, effectively disabling the given behavior
-        /// </summary>
-        None = 0,
-        /// <summary>
         /// Shows that are recommended to you
         /// </summary>
         Recommended = 1,

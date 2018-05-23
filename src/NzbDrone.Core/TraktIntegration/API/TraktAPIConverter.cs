@@ -5,7 +5,7 @@ using NzbDrone.Core.Tv;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NzbDrone.Core.TraktIntegration
+namespace NzbDrone.Core.TraktIntegration.API
 {
     /// <summary>
     /// Tries converting between Trakt API types to Sonarr model types.
@@ -13,9 +13,9 @@ namespace NzbDrone.Core.TraktIntegration
     /// </summary>
     public interface ITraktAPIConverter
     {
-        Series TraktShowToSeries(API.Show show);
-        Episode TraktEpisodeToModel(API.Episode episode, Series series);
-        Episode TraktEpisodeToModel(API.Episode episode, API.Show show);
+        Series TraktShowToSeries(Types.Show show);
+        Episode TraktEpisodeToModel(Types.Episode episode, Series series);
+        Episode TraktEpisodeToModel(Types.Episode episode, Types.Show show);
     }
 
     public class TraktAPIConverter : ITraktAPIConverter
@@ -33,7 +33,7 @@ namespace NzbDrone.Core.TraktIntegration
             this.logger = logger;
         }
 
-        public Series TraktShowToSeries(API.Show show)
+        public Series TraktShowToSeries(Types.Show show)
         {
             return seriesService.FindByTvdbId(show.Ids.Tvdb) ??
                    seriesService.FindByTitle(show.Title) ??
@@ -42,7 +42,7 @@ namespace NzbDrone.Core.TraktIntegration
 
         }
 
-        public Episode TraktEpisodeToModel(API.Episode episode, Series series)
+        public Episode TraktEpisodeToModel(Types.Episode episode, Series series)
         {
             var candidates =
                    new List<Episode>() { episodeService.FindEpisode(series.Id, episode.Season, episode.Number) } ??
@@ -66,7 +66,7 @@ namespace NzbDrone.Core.TraktIntegration
 
         }
 
-        public Episode TraktEpisodeToModel(API.Episode episode, API.Show show)
+        public Episode TraktEpisodeToModel(Types.Episode episode, Types.Show show)
         {
             return TraktEpisodeToModel(episode, TraktShowToSeries(show));
         }

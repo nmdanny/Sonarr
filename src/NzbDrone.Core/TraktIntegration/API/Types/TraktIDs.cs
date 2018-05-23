@@ -3,7 +3,7 @@ using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 
-namespace NzbDrone.Core.TraktIntegration.API
+namespace NzbDrone.Core.TraktIntegration.API.Types
 {
     /// <summary>
     /// Identifiers of media objects in Trakt API.

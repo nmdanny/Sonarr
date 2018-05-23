@@ -9,6 +9,7 @@ using NzbDrone.Core.TraktIntegration.API;
 using NzbDrone.Core.TraktIntegration.Credentials;
 using System.Threading.Tasks;
 using NzbDrone.Core.TraktIntegration.Settings;
+using NzbDrone.Core.TraktIntegration.API.Types;
 
 namespace NzbDrone.Core.TraktIntegration
 {

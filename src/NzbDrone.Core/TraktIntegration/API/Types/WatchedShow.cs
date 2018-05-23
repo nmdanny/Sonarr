@@ -1,25 +1,26 @@
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using NzbDrone.Core.TraktIntegration.Settings;
 using System;
+using System.Collections.Generic;
 
-namespace NzbDrone.Core.TraktIntegration.API
+namespace NzbDrone.Core.TraktIntegration.API.Types
 {
-    public class WatchlistShow : ISourcedShow
+    public class WatchedShow : ISourcedShow
     {
         [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
-        public int Rank { get; set; }
+        public int Plays { get; set; }
 
         [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
-        public DateTime ListedAt { get; set; }
-
-        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
-        public string Type { get => "show"; }
+        public DateTime LastWatchedAt { get; set; }
 
         [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
         public Show Show { get; set; }
 
-        public TraktSources SourceType => TraktSources.Watchlist;
+        [JsonProperty(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
+        public List<WatchedSeason> Seasons { get; set; }
+
+        public TraktSources SourceType => TraktSources.Watched;
 
     }
 }

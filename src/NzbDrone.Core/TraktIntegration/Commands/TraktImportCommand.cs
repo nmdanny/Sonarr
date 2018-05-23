@@ -20,10 +20,25 @@ namespace NzbDrone.Core.TraktIntegration.Commands
             ProfileId = profileId;
         }
 
+        /// <summary>
+        /// Should we import only shows with missing episodes, or all shows?
+        /// </summary>
         public ImportConditions ImportConditions { get; set; }
+        /// <summary>
+        /// When importing shows, which Trakt sources to use?(Watched, Watchlist, Collection, Recommended, etc...)
+        /// </summary>
         public TraktSources ImportFrom;
+        /// <summary>
+        /// Include special episodes when considering unseen episodes?
+        /// </summary>
         public bool IncludeSpecials { get; set; }
+        /// <summary>
+        /// The default root folder for imported shows
+        /// </summary>
         public string RootFolderPath { get; set; }
+        /// <summary>
+        /// The default profile id for imported shows
+        /// </summary>
         public int ProfileId { get; set; }
 
     }

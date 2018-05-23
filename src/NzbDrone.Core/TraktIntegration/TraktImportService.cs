@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using NzbDrone.Core.TraktIntegration.API.Types;
 
 namespace NzbDrone.Core.TraktIntegration
 {
@@ -33,7 +34,7 @@ namespace NzbDrone.Core.TraktIntegration
         public void Execute(TraktImportCommand message)
         {
             logger.Info($"Importing shows from the following Trakt sources: {message.ImportFrom}, conditions: {message.ImportConditions}");
-            List<API.Show> missingShows = GetMissingTraktShows(message);
+            List<Show> missingShows = GetMissingTraktShows(message.ImportFrom);
             logger.Debug($"Found {missingShows.Count} Trakt shows that aren't in Sonarr.");
             var showsToImport = FilterShowsToImport(missingShows, message.ImportConditions, message.IncludeSpecials);
             logger.Debug($"Importing {showsToImport.Count()} shows from Trakt");
@@ -53,7 +54,7 @@ namespace NzbDrone.Core.TraktIntegration
             }, priority: CommandPriority.High);
         }
 
-        private IEnumerable<API.Show> FilterShowsToImport(List<API.Show> missingTraktShows,
+        private IEnumerable<Show> FilterShowsToImport(List<Show> missingTraktShows,
                                                           ImportConditions importConditions, bool includeSpecials)
         {
             if (importConditions == ImportConditions.UnseenEpisodes)
@@ -67,15 +68,15 @@ namespace NzbDrone.Core.TraktIntegration
 
         }
 
-        private List<API.Show> GetMissingTraktShows(TraktImportCommand message)
+        private List<Show> GetMissingTraktShows(TraktSources importFrom)
         {
-            return traktService.GetTraktShows(message.ImportFrom)
+            return traktService.GetTraktShows(importFrom)
                             .Select(s => s.Show)
                             .ExceptBy(s => s.Ids.Tvdb, seriesService.GetAllSeries(), s => s.TvdbId, EqualityComparer<int>.Default)
                             .ToList();
         }
 
-        private void ImportShow(API.Show show, string rootFolderPath, int profileId)
+        private void ImportShow(Show show, string rootFolderPath, int profileId)
         {
             var addedSeries = addSeriesService.AddSeries(new Series()
             {

@@ -1,5 +1,6 @@
 using NLog;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Core.TraktIntegration.API;
 using NzbDrone.Core.TraktIntegration.Commands;
 using NzbDrone.Core.TraktIntegration.Settings;
 using NzbDrone.Core.Messaging.Commands;

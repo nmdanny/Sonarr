@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using NzbDrone.Core.TraktIntegration.Settings;
 
-namespace NzbDrone.Core.TraktIntegration.API
+namespace NzbDrone.Core.TraktIntegration.API.Types
 {
     public class CollectedShow : ISourcedShow
     {

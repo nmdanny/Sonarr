@@ -4,7 +4,7 @@ using NzbDrone.Common.Extensions;
 using System;
 using System.Collections.Generic;
 
-namespace NzbDrone.Core.TraktIntegration.API
+namespace NzbDrone.Core.TraktIntegration.API.Types
 {
     public class Show : ITraktMediaObject
     {
