@@ -1,4 +1,6 @@
 using NzbDrone.Common.Serializer;
+using NzbDrone.Core.Datastore.Events;
+using NzbDrone.Core.Messaging.Events;
 
 namespace NzbDrone.Core.Configuration
 {
@@ -10,10 +12,13 @@ namespace NzbDrone.Core.Configuration
     public abstract class ConfigObjectStore<T> where T : class, new()
     {
         private readonly IConfigRepository repo;
+        private readonly IEventAggregator eventAggregator;
 
         private T _object = null;
-        public ConfigObjectStore(IConfigRepository repo) {
+        public ConfigObjectStore(IConfigRepository repo, IEventAggregator eventAggregator)
+        {
             this.repo = repo;
+            this.eventAggregator = eventAggregator;
             Load();
         }
 
@@ -21,6 +26,11 @@ namespace NzbDrone.Core.Configuration
         /// A unique database identifier for the object.
         /// </summary>
         protected abstract string ConfigKey { get; }
+
+        /// <summary>
+        /// Should model events(<see cref="ModelEvent{TModel}"/>) be published when creating, updating or deleting the Item?
+        /// </summary>
+        protected virtual bool PublishModelEvents => false;
 
         /// <summary>
         /// <para>Getter - Gets the object from memory, or null if it doesn't exist.</para>
@@ -79,10 +89,12 @@ namespace NzbDrone.Core.Configuration
                     Key = ConfigKey,
                     Value = _object.ToJson()
                 });
+                PublishModelEvent(_object, ModelAction.Created);
             } else
             {
                 cfgItem.Value = _object.ToJson();
                 repo.Update(cfgItem);
+                PublishModelEvent(_object, ModelAction.Updated);
             }
         }
 
@@ -96,6 +108,15 @@ namespace NzbDrone.Core.Configuration
             if (cfgItem != null)
             {
                 repo.Delete(cfgItem);
+                PublishModelEvent(new T(), ModelAction.Deleted);
+            }
+        }
+
+        private void PublishModelEvent(T model, ModelAction action)
+        {
+            if (PublishModelEvents)
+            {
+                eventAggregator.PublishEvent(new ModelEvent<T>(model, action));
             }
         }
 
