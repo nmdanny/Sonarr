@@ -7,7 +7,8 @@ vent.Events = {
     SeriesDeleted      : 'series:deleted',
     CommandComplete    : 'command:complete',
     ServerUpdated      : 'server:updated',
-    EpisodeFileDeleted : 'episodefile:deleted'
+    EpisodeFileDeleted : 'episodefile:deleted',
+    TraktCredsChanged  : 'server:traktcredentials'
 };
 
 vent.Commands = {

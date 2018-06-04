@@ -20,6 +20,8 @@ var MetadataLayout = require('./Metadata/MetadataLayout');
 var GeneralView = require('./General/GeneralView');
 var UiView = require('./UI/UiView');
 var UiSettingsModel = require('./UI/UiSettingsModel');
+var TraktIntegrationLayout = require('./TraktIntegration/TraktIntegrationLayout');
+var TraktIntegrationModel = require('./TraktIntegration/TraktIntegrationSettingsModel');
 var LoadingView = require('../Shared/LoadingView');
 var Config = require('../Config');
 
@@ -36,6 +38,7 @@ module.exports = Marionette.Layout.extend({
         metadata        : '#metadata',
         general         : '#general',
         uiRegion        : '#ui',
+        trakt           : '#trakt',
         loading         : '#loading-region'
     },
 
@@ -49,6 +52,7 @@ module.exports = Marionette.Layout.extend({
         metadataTab        : '.x-metadata-tab',
         generalTab         : '.x-general-tab',
         uiTab              : '.x-ui-tab',
+        traktTab           : '.x-trakt-tab',
         advancedSettings   : '.x-advanced-settings'
     },
 
@@ -62,6 +66,7 @@ module.exports = Marionette.Layout.extend({
         'click .x-metadata-tab'         : '_showMetadata',
         'click .x-general-tab'          : '_showGeneral',
         'click .x-ui-tab'               : '_showUi',
+        'click .x-trakt-tab'            : '_showTrakt',
         'click .x-save-settings'        : '_save',
         'change .x-advanced-settings'   : '_toggleAdvancedSettings'
     },
@@ -85,6 +90,7 @@ module.exports = Marionette.Layout.extend({
         this.notificationCollection = new NotificationCollection();
         this.generalSettings = new GeneralSettingsModel();
         this.uiSettings = new UiSettingsModel();
+        this.traktSettings = new TraktIntegrationModel();
         Backbone.$.when(this.mediaManagementSettings.fetch(), this.namingSettings.fetch(), this.indexerSettings.fetch(), this.downloadClientSettings.fetch(),
             this.notificationCollection.fetch(), this.generalSettings.fetch(), this.uiSettings.fetch()).done(function() {
                 if (!self.isClosed) {
@@ -100,6 +106,7 @@ module.exports = Marionette.Layout.extend({
                     self.notifications.show(new NotificationCollectionView({ collection : self.notificationCollection }));
                     self.metadata.show(new MetadataLayout());
                     self.general.show(new GeneralView({ model : self.generalSettings }));
+                    self.trakt.show(new TraktIntegrationLayout({model: self.traktSettings}));
                     self.uiRegion.show(new UiView({ model : self.uiSettings }));
                 }
             });
@@ -135,6 +142,9 @@ module.exports = Marionette.Layout.extend({
                 break;
             case 'ui':
                 this._showUi();
+                break;
+            case 'trakt':
+                this._showTrakt();
                 break;
             default:
                 this._showMediaManagement();
@@ -217,6 +227,14 @@ module.exports = Marionette.Layout.extend({
         }
         this.ui.uiTab.tab('show');
         this._navigate('settings/ui');
+    },
+
+    _showTrakt: function(e) {
+        if (e) {
+            e.preventDefault();
+        }
+        this.ui.traktTab.tab('show');
+        this._navigate('settings/trakt');
     },
 
     _navigate : function(route) {

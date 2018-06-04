@@ -1,0 +1,25 @@
+<div class="form-horizontal">
+    {{#if accessToken}}
+    <div class="form-group credentials-view">
+        <p>Trakt Credentials are set.</p>
+        <label for="clientId">Client ID</label>
+        <input type="text" name="clientId" class="form-control" disabled="true" value={{clientId}} />
+        <button class="btn btn-danger x-unauthorize">Unauthorize</button>
+    </div>
+    {{else}}
+    <div class="form-group credentials-form">
+    <fieldset>
+        <legend>Trakt Credentials</legend>
+        <a href="https://trakt.tv/oauth/applications/new">Obtain Trakt Credentials</a>
+        <br/>
+        <label for="clientId">Client ID</label>
+        <input type="text" name="clientId" class="form-control" placeholder="Client ID" />
+
+        <label for="clientSecret">Client Secret</label>
+        <input type="text" name="clientSecret" class="form-control" placeholder="Client Secret"/>
+        <button class="btn btn-primary x-authorize">Authorize</button>
+    </fieldset>
+    </div>
+    {{/if}}
+    </div>
+</div>
