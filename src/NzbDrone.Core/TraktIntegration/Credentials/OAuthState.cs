@@ -16,5 +16,7 @@ namespace NzbDrone.Core.TraktIntegration.Credentials
         // security related:
         public byte[] RandomBytes { get; set; }
         public byte[] Signature { get; set; }
+        // to where shall our API redirect the user after hitting the OAuth callback endpoint?
+        public string RedirectTo { get; set; }
     }
 }

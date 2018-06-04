@@ -12,6 +12,8 @@ using NzbDrone.Core.TraktIntegration;
 using NzbDrone.Core.TraktIntegration.API;
 using NzbDrone.Common.Serializer;
 using NzbDrone.Common.Http;
+using NzbDrone.Core.Messaging.Events;
+using NzbDrone.SignalR;
 
 namespace NzbDrone.Api.Trakt
 {
@@ -19,7 +21,7 @@ namespace NzbDrone.Api.Trakt
     /// REST interface for managing credentials of the Trakt API.
     /// Note, there's either 0 or 1 set of credentials stored, so IDs don't matter.
     /// </summary>
-    public class TraktCredentialsModule : NzbDroneRestModule<TraktCredentialsResource>
+    public class TraktCredentialsModule : NzbDroneRestModuleWithSignalR<TraktCredentialsResource, TraktCredentials>
     {
         private readonly ITraktCredentialsManager credStore;
         private readonly Logger logger;
@@ -27,7 +29,7 @@ namespace NzbDrone.Api.Trakt
         private readonly OAuthStateCrypto oauthStateCrypto;
         private readonly TraktAPIHelper traktAPIHelper;
         public TraktCredentialsModule(ITraktCredentialsManager credStore, Logger logger, TraktCredentialsResourceValidator validator,
-            OAuthStateCrypto oauthStateCrypto, TraktAPIHelper traktAPIHelper) : base()
+            OAuthStateCrypto oauthStateCrypto, TraktAPIHelper traktAPIHelper, IBroadcastSignalRMessage signalRBroadcaster) : base(signalRBroadcaster)
         {
             this.credStore = credStore;
             this.logger = logger;
@@ -35,7 +37,8 @@ namespace NzbDrone.Api.Trakt
             this.traktAPIHelper = traktAPIHelper;
             this.oauthStateCrypto = oauthStateCrypto;
 
-            Get["oauth/redirect"] = x => OAuthRedirect(Request.Query["clientId"], Request.Query["secret"]);
+            Get["oauth/redirect"] = x => OAuthRedirect(Request.Query["clientId"], Request.Query["secret"], Request.Query["origin"]);
+            Get["oauth/redirecturl"] = x => GenerateRedirectUrl(Request.Query["clientId"], Request.Query["secret"], Request.Query["origin"]);
             Get["oauth"] = x => OAuthCallback();
             GetResourceSingle = GetTraktCredentials;
             GetResourceById = id => GetTraktCredentials();
@@ -45,17 +48,24 @@ namespace NzbDrone.Api.Trakt
             SharedValidator.Include(validator);
         }
 
-
-        public object OAuthRedirect(string clientId, string secret)
+        public string GenerateRedirectUrl(string clientId, string secret, string originUrl)
         {
-            logger.Debug("Redirecting client to OAuth server");
+            logger.Debug("Generating OAuth redirect URL for client");
             var oauthState = new OAuthState()
             {
                 ClientId = clientId,
-                Secret = secret
+                Secret = secret,
+                RedirectTo = originUrl
             };
             oauthStateCrypto.Sign(oauthState);
             var redirectUri = traktAPIHelper.ClientRedirectUri(oauthState);
+            return redirectUri;
+        }
+
+        public object OAuthRedirect(string clientId, string secret, string originUrl)
+        {
+            logger.Debug("Redirecting client to OAuth server");
+            var redirectUri = GenerateRedirectUrl(clientId, secret, originUrl);
             var res = Response.AsResponse(Nancy.HttpStatusCode.Found);
             res.Headers.Add(new KeyValuePair<string, string>("Location", redirectUri));
             return res;
@@ -65,9 +75,12 @@ namespace NzbDrone.Api.Trakt
         {
             logger.Debug("Handling callback from OAuth server");
             var code = (string)Request.Query["code"];
-            var state = Json.Deserialize<OAuthState>(Request.Query["state"]);
+            var state = Json.Deserialize<OAuthState>((string)Request.Query["state"]);
             credStore.AddTraktCredentials(state, code);
-            return new object().AsResponse();
+            var res = Response.AsResponse(Nancy.HttpStatusCode.Found);
+            res.Headers.Add(new KeyValuePair<string, string>("Location", state.RedirectTo));
+            logger.Debug("Callback handled successfully, redirecting authenticating client back to " + state.RedirectTo);
+            return res;
         }
 
         public TraktCredentialsResource GetTraktCredentials()
