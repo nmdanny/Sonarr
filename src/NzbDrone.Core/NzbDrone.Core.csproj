@@ -838,8 +838,11 @@
     <Compile Include="TraktIntegration\Credentials\OAuthState.cs" />
     <Compile Include="TraktIntegration\Credentials\OAuthStateCrypto.cs" />
     <Compile Include="TraktIntegration\Credentials\TraktCredentialsManager.cs" />
+    <Compile Include="TraktIntegration\Events\TraktCredentialsAddedEvent.cs" />
+    <Compile Include="TraktIntegration\Events\TraktCredentialsDeletedEvent.cs" />
     <Compile Include="TraktIntegration\Settings\ImportConditions.cs" />
     <Compile Include="TraktIntegration\Settings\MonitorBehavior.cs" />
+    <Compile Include="TraktIntegration\Settings\TraktSettingsStore.cs" />
     <Compile Include="TraktIntegration\Settings\TraktSources.cs" />
     <Compile Include="TraktIntegration\ImportOnStart.cs" />
     <Compile Include="TraktIntegration\API\TraktAPIConverter.cs" />

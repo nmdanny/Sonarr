@@ -247,6 +247,8 @@
     <Compile Include="TinyIoCNancyBootstrapper.cs" />
     <Compile Include="Trakt\TraktCredentialsModule.cs" />
     <Compile Include="Trakt\TraktCredentialsResource.cs" />
+    <Compile Include="Trakt\TraktSettingsModule.cs" />
+    <Compile Include="Trakt\TraktSettingsResource.cs" />
     <Compile Include="Update\UpdateModule.cs" />
     <Compile Include="Update\UpdateResource.cs" />
     <Compile Include="Validation\RssSyncIntervalValidator.cs" />
