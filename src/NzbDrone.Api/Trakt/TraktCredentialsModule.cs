@@ -23,17 +23,15 @@ namespace NzbDrone.Api.Trakt
     /// </summary>
     public class TraktCredentialsModule : NzbDroneRestModuleWithSignalR<TraktCredentialsResource, TraktCredentials>
     {
-        private readonly ITraktCredentialsManager credStore;
+        private readonly ITraktCredentialsManager credsManager;
         private readonly Logger logger;
-        private readonly TraktCredentialsResourceValidator validator;
         private readonly OAuthStateCrypto oauthStateCrypto;
         private readonly TraktAPIHelper traktAPIHelper;
-        public TraktCredentialsModule(ITraktCredentialsManager credStore, Logger logger, TraktCredentialsResourceValidator validator,
+        public TraktCredentialsModule(ITraktCredentialsManager credsManager, Logger logger, TraktCredentialsResourceValidator validator,
             OAuthStateCrypto oauthStateCrypto, TraktAPIHelper traktAPIHelper, IBroadcastSignalRMessage signalRBroadcaster) : base(signalRBroadcaster)
         {
-            this.credStore = credStore;
+            this.credsManager = credsManager;
             this.logger = logger;
-            this.validator = validator;
             this.traktAPIHelper = traktAPIHelper;
             this.oauthStateCrypto = oauthStateCrypto;
 
@@ -76,7 +74,7 @@ namespace NzbDrone.Api.Trakt
             logger.Debug("Handling callback from OAuth server");
             var code = (string)Request.Query["code"];
             var state = Json.Deserialize<OAuthState>((string)Request.Query["state"]);
-            credStore.AddTraktCredentials(state, code);
+            credsManager.AddTraktCredentials(state, code);
             var res = Response.AsResponse(Nancy.HttpStatusCode.Found);
             res.Headers.Add(new KeyValuePair<string, string>("Location", state.RedirectTo));
             logger.Debug("Callback handled successfully, redirecting authenticating client back to " + state.RedirectTo);
@@ -85,14 +83,14 @@ namespace NzbDrone.Api.Trakt
 
         public TraktCredentialsResource GetTraktCredentials()
         {
-            if (!credStore.HasCredentials)
+            if (!credsManager.HasCredentials)
             {
                 return new TraktCredentialsResource()
                 {
 
                 };
             }
-            var model = credStore.GetTraktCredentials();
+            var model = credsManager.GetTraktCredentials();
             return model.ToResource();
         }
 
@@ -100,7 +98,7 @@ namespace NzbDrone.Api.Trakt
         // ID doesn't matter
         private void DeleteTraktCredentials(int obj)
         {
-            credStore.DeleteExistingCredentials();
+            credsManager.DeleteExistingCredentials();
         }
     }
 }

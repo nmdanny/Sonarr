@@ -15,13 +15,13 @@ namespace NzbDrone.Core.TraktIntegration.Settings
 {
     public class TraktSettings
     {
-        public bool TraktIntegrationEnabled { get; set; }
+        public bool TraktIntegrationEnabled { get; set; } = false;
         public TraktCredentials Credentials { get; set; }
 
         public TraktSources MonitorSources { get; set; } = TraktSources.All;
         public MonitorBehavior MonitorBehavior { get; set; } = MonitorBehavior.TraktOnly;
 
-        public TraktSources ImportSources { get; set; } = TraktSources.Watched;
+        public TraktSources ImportSources { get; set; } = TraktSources.Watched & TraktSources.Watchlist;
         public ImportConditions ImportConditions { get; set; } = ImportConditions.UnseenEpisodes;
 
         public string DefaultRootFolder { get; set; }

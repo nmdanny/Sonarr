@@ -6,6 +6,7 @@ using NzbDrone.Common.Serializer;
 using NzbDrone.Common.EnsureThat;
 using NzbDrone.Core.TraktIntegration.API;
 using NzbDrone.Core.Messaging.Events;
+using NzbDrone.Core.TraktIntegration.Settings;
 
 namespace NzbDrone.Core.TraktIntegration.Credentials
 {
@@ -23,26 +24,16 @@ namespace NzbDrone.Core.TraktIntegration.Credentials
 
     }
 
-    public class TraktCredentialsObjectStore : ConfigObjectStore<TraktCredentials>
-    {
-        public TraktCredentialsObjectStore(IConfigRepository repo, IEventAggregator aggregator) : base(repo, aggregator)
-        {
-
-        }
-        protected override string ConfigKey => "trakt_credentials";
-        protected override bool PublishModelEvents => true;
-    }
-
     public class TraktCredentialsManager : ITraktCredentialsManager
     {
         private readonly IHttpClient http;
-        private readonly ConfigObjectStore<TraktCredentials> store;
+        private readonly ConfigObjectStore<TraktSettings> store;
         private readonly Logger logger;
         private readonly TraktAPIHelper helper;
         private readonly OAuthStateCrypto oauthStateCrypto;
         private readonly IEventAggregator eventAggregator;
 
-        public TraktCredentialsManager(IHttpClient http, Logger logger, TraktCredentialsObjectStore store, TraktAPIHelper helper,
+        public TraktCredentialsManager(IHttpClient http, Logger logger, TraktSettingsStore store, TraktAPIHelper helper,
             OAuthStateCrypto oauthStateCrypto, IEventAggregator eventAggregator)
         {
             this.http = http;
@@ -53,11 +44,11 @@ namespace NzbDrone.Core.TraktIntegration.Credentials
             this.eventAggregator = eventAggregator;
         }
 
-        public bool HasCredentials => store.Item != null;
+        public bool HasCredentials => store.Item?.Credentials != null;
 
         public TraktCredentials GetTraktCredentials()
         {
-            return store.Item ?? throw new MissingTraktCredentials();
+            return store.Item?.Credentials ?? throw new MissingTraktCredentials();
         }
 
         public TraktCredentials AddTraktCredentials(OAuthState state, string code)
@@ -71,13 +62,19 @@ namespace NzbDrone.Core.TraktIntegration.Credentials
                 ClientId = state.ClientId,
                 Secret = state.Secret
             };
-            store.Item = FillOAuthTokens(creds, code, false);
+            if (store.Item == null)
+            {
+                store.Item = new TraktSettings();
+            }
+            creds = FillOAuthTokens(creds, code, false);
             var validation = creds.Validate();
             if (!validation.IsValid)
             {
                 var err = string.Join(", ", validation.Errors);
                 throw new InvalidCredentialsException($"Trakt credentials aren't valid: {err} ");
             }
+            store.Item.Credentials = creds;
+            store.Save();
             eventAggregator.PublishEvent(new Events.TraktCredentialsAddedEvent());
             logger.Info("Trakt Credentials added successfully.");
             return creds;
@@ -91,7 +88,8 @@ namespace NzbDrone.Core.TraktIntegration.Credentials
                 return;
             }
 
-            store.Item = null;
+            store.Item.Credentials = null;
+            store.Save();
             eventAggregator.PublishEvent(new Events.TraktCredentialsDeletedEvent());
             logger.Info("Deleted Trakt credentials successfully.");
         }
@@ -111,7 +109,8 @@ namespace NzbDrone.Core.TraktIntegration.Credentials
             else
             {
                 logger.Debug("Trakt OAuth2 access token expired, getting a new one.");
-                store.Item = FillOAuthTokens(creds, creds.RefreshToken, true);
+                store.Item.Credentials = FillOAuthTokens(creds, creds.RefreshToken, true);
+                store.Save();
             }
 
         }

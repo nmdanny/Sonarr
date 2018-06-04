@@ -10,14 +10,15 @@ using FluentValidation.Results;
 using System.Collections.Generic;
 using NLog;
 using System.Net;
+using NzbDrone.Core.Datastore;
 
 namespace NzbDrone.Core.TraktIntegration.Credentials
 {
     /// <summary>
     /// Credentials needed for the Trakt API
     /// </summary>
-    public class TraktCredentials
-    { 
+    public class TraktCredentials: ModelBase
+    {
         public string ClientId { get; set; }
         public string Secret { get; set; }
         public string AccessToken { get; set; }
