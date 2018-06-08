@@ -1,6 +1,8 @@
 using NLog;
 using System;
+using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace NzbDrone.Core.TraktIntegration.Credentials
 {
@@ -32,18 +34,35 @@ namespace NzbDrone.Core.TraktIntegration.Credentials
 
         public void Sign(OAuthState state)
         {
-            state.RandomBytes = new byte[64];
+            state.RandomBytes = new byte[32];
             random.NextBytes(state.RandomBytes);
+
             var formatter = new RSAPKCS1SignatureFormatter(cryptoProvider);
             formatter.SetHashAlgorithm(hashAlg);
-            state.Signature = formatter.CreateSignature(state.RandomBytes);
+            using (var sha512 = SHA512.Create())
+            {
+                var dataToSign = ToBytes(state);
+                var hashedData = sha512.ComputeHash(dataToSign);
+                state.Signature = formatter.CreateSignature(hashedData);
+            }
         }
 
         public bool Verify(OAuthState state)
         {
             var deformatter = new RSAPKCS1SignatureDeformatter(cryptoProvider);
             deformatter.SetHashAlgorithm(hashAlg);
-            return deformatter.VerifySignature(state.RandomBytes, state.Signature);
+            using (var sha512 = SHA512.Create())
+            {
+                var dataToVerify = ToBytes(state);
+                var hashedData = sha512.ComputeHash(dataToVerify);
+                return deformatter.VerifySignature(hashedData, state.Signature);
+            }
+        }
+
+        private byte[] ToBytes(OAuthState state)
+        {
+            var expectedBytes = Encoding.UTF8.GetBytes($"{state.ClientId}:{state.Secret}:{state.RedirectTo}");
+            return expectedBytes.Concat(state.RandomBytes).ToArray();
         }
     }
 }
