@@ -7,7 +7,13 @@ namespace NzbDrone.Core.TraktIntegration.Credentials
     /// <summary>
     /// Signs and verifies <see cref="OAuthState"/>
     /// </summary>
-    public class OAuthStateCrypto : IDisposable
+    public interface IOAuthStateCrypto
+    {
+        void Sign(OAuthState state);
+        bool Verify(OAuthState state);
+    }
+
+    public class OAuthStateCrypto : IDisposable, IOAuthStateCrypto
     {
         private readonly Random random;
         private static readonly string hashAlg = "SHA512";

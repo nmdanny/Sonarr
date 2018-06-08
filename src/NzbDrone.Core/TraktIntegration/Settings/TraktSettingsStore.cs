@@ -15,6 +15,6 @@ namespace NzbDrone.Core.TraktIntegration.Settings
 
         protected override string ConfigKey => "trakt_integration_settings";
 
-        protected override bool PublishModelEvents => true;
+        public override bool PublishModelEvents => true;
     }
 }

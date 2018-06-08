@@ -16,27 +16,49 @@ namespace NzbDrone.Core.TraktIntegration.Credentials
     /// </summary>
     public interface ITraktCredentialsManager
     {
+        /// <summary>
+        /// Creates and stores Trakt credentials with the given parameters, overwriting any
+        /// previous credentials if existing.
+        /// </summary>
+        /// <param name="state">OAuth state parameters</param>
+        /// <param name="code">Code used for OAuth access code exchange</param>
+        /// <returns>The newly added credentials</returns>
         TraktCredentials AddTraktCredentials(OAuthState state, string code);
+
+        /// <summary>
+        /// Obtains the currently stored credentials, throwing an error if none exist.
+        /// </summary>
         TraktCredentials GetTraktCredentials();
+
+        /// <summary>
+        /// Ensures that the stored credentials are updated, otherwise refreshes them.
+        /// Throws an error if no credentials exist.
+        /// </summary>
         void EnsureFreshCredentialsAvailable();
-        void DeleteExistingCredentials();
+
+        /// <summary>
+        /// Deletes the stored credentials if they exist, otherwise does nothing.
+        /// </summary>
+        void DeleteCredentialsIfExists();
+
+        /// <summary>
+        /// Checks if Trakt credentials are available.
+        /// </summary>
         bool HasCredentials { get; }
 
     }
 
     public class TraktCredentialsManager : ITraktCredentialsManager
     {
-        private readonly IHttpClient http;
-        private readonly ConfigObjectStore<TraktSettings> store;
+        private readonly IConfigObjectStore<TraktSettings> store;
         private readonly Logger logger;
-        private readonly TraktAPIHelper helper;
-        private readonly OAuthStateCrypto oauthStateCrypto;
+        private readonly ITraktAPIHelper helper;
+        private readonly IOAuthStateCrypto oauthStateCrypto;
         private readonly IEventAggregator eventAggregator;
 
-        public TraktCredentialsManager(IHttpClient http, Logger logger, TraktSettingsStore store, TraktAPIHelper helper,
-            OAuthStateCrypto oauthStateCrypto, IEventAggregator eventAggregator)
+        public TraktCredentialsManager(Logger logger, IConfigObjectStore<TraktSettings> store, ITraktAPIHelper helper,
+            IOAuthStateCrypto oauthStateCrypto, IEventAggregator eventAggregator)
         {
-            this.http = http;
             this.logger = logger;
             this.store = store;
             this.helper = helper;
@@ -66,7 +88,7 @@ namespace NzbDrone.Core.TraktIntegration.Credentials
             {
                 store.Item = new TraktSettings();
             }
-            creds = FillOAuthTokens(creds, code, false);
+            creds = helper.FillOAuthTokens(creds, code, false);
             var validation = creds.Validate();
             if (!validation.IsValid)
             {
@@ -80,11 +102,11 @@ namespace NzbDrone.Core.TraktIntegration.Credentials
             return creds;
         }
 
-        public void DeleteExistingCredentials()
+        public void DeleteCredentialsIfExists()
         {
             if (!HasCredentials)
             {
-                logger.Warn("Tried to delete Trakt credentials, but none exist.");
+                logger.Debug("Tried to delete Trakt credentials, but none exist.");
                 return;
             }
 
@@ -96,12 +118,8 @@ namespace NzbDrone.Core.TraktIntegration.Credentials
 
         public void EnsureFreshCredentialsAvailable()
         {
-            if (!HasCredentials)
-            {
-                throw new MissingTraktCredentials();
-            }
             var creds = GetTraktCredentials();
-            if (creds.LastRefreshDate < creds.ExpirationDate)
+            if (DateTime.Now < creds.ExpirationDate)
             {
                 logger.Debug("Trakt credentials are fresh, no need to do anything");
                 return;
@@ -109,60 +127,11 @@ namespace NzbDrone.Core.TraktIntegration.Credentials
             else
             {
                 logger.Debug("Trakt OAuth2 access token expired, getting a new one.");
-                store.Item.Credentials = FillOAuthTokens(creds, creds.RefreshToken, true);
+                store.Item.Credentials = helper.FillOAuthTokens(creds, creds.RefreshToken, true);
                 store.Save();
             }
 
         }
-
-        private TraktCredentials FillOAuthTokens(TraktCredentials creds, string codeOrRefresh, bool doRefresh)
-        {
-            var oauthReq = helper.PrepareTraktRequest(creds, "oauth/token", HttpMethod.POST);
-            switch (doRefresh)
-            {
-                case true:
-                    var refreshRequest = new OAuthAccessRefreshRequest()
-                    {
-                        ClientId = creds.ClientId,
-                        ClientSecret = creds.Secret,
-                        RefreshToken = codeOrRefresh,
-                        RedirectUri = helper.ExchangeRedirectUri()
-                    };
-                    oauthReq.SetContent(refreshRequest.ToJson());
-                    break;
-                case false:
-                    var exchangeRequest = new OAuthCodeExchangeRequest()
-                    {
-                        ClientId = creds.ClientId,
-                        ClientSecret = creds.Secret,
-                        Code = codeOrRefresh,
-                        RedirectUri = helper.ExchangeRedirectUri()
-                    };
-                    oauthReq.SetContent(exchangeRequest.ToJson());
-                    break;
-            }
-            var res = http.Execute(oauthReq);
-            if (res.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                throw new TraktException("Failed to obtain/refresh OAuth access token for Trakt credentials due to unknown error",
-                    new HttpException(res));
-            }
-            try
-            {
-                var tokens = Json.Deserialize<OAuthTokensResponse>(res.Content);
-                creds.AccessToken = tokens.AccessToken;
-                creds.RefreshToken = tokens.RefreshToken;
-                var lastRefreshTime = new DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc).AddSeconds(tokens.CreatedAt);
-                creds.LastRefreshDate = lastRefreshTime;
-                creds.ExpirationDate = lastRefreshTime.AddSeconds(tokens.ExpiresIn);
-                return creds;
-            }
-            catch (Newtonsoft.Json.JsonException ex)
-            {
-                throw new TraktException("Failed to deserialize OAuth response tokens", ex);
-            }
-        }
-
 
     }
 }

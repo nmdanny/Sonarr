@@ -140,6 +140,7 @@
     <Compile Include="Configuration\ConfigService.cs" />
     <Compile Include="Configuration\Events\ConfigFileSavedEvent.cs" />
     <Compile Include="Configuration\Events\ConfigSavedEvent.cs" />
+    <Compile Include="Configuration\IConfigObjectStore.cs" />
     <Compile Include="Configuration\IConfigService.cs" />
     <Compile Include="Configuration\InvalidConfigFileException.cs" />
     <Compile Include="Configuration\ResetApiKeyCommand.cs" />

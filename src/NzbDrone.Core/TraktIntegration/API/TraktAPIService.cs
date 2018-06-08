@@ -46,12 +46,12 @@ namespace NzbDrone.Core.TraktIntegration
         private readonly ITraktCredentialsManager credStore;
         private readonly IHttpClient http;
         private readonly Logger logger;
-        private readonly OAuthStateCrypto oauthStateCrypto;
+        private readonly IOAuthStateCrypto oauthStateCrypto;
         private readonly TraktCredentials credentials;
-        private readonly TraktAPIHelper helper;
+        private readonly ITraktAPIHelper helper;
 
-        public TraktAPIService(ITraktCredentialsManager credStore, IHttpClient http, Logger logger, TraktAPIHelper helper,
-            OAuthStateCrypto oauthStateCrypto)
+        public TraktAPIService(ITraktCredentialsManager credStore, IHttpClient http, Logger logger, ITraktAPIHelper helper,
+            IOAuthStateCrypto oauthStateCrypto)
         {
             this.credStore = credStore;
             this.http = http;

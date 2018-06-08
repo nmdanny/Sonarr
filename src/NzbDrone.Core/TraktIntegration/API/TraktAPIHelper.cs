@@ -9,17 +9,52 @@ namespace NzbDrone.Core.TraktIntegration.API
     /// <summary>
     /// Includes utility methods and constants used for Trakt.
     /// </summary>
-    public class TraktAPIHelper
+    public interface ITraktAPIHelper
+    {
+        /// <summary>
+        /// Generates a URL to redirect the client to Trakt's OAuth2 endpoint.
+        /// </summary>
+        string ClientRedirectUri(OAuthState state);
+
+        /// <summary>
+        /// The redirection URL from OAuth's server back to our api.
+        /// </summary>
+        /// <returns></returns>
+        string ExchangeRedirectUri();
+
+        /// <summary>
+        /// Prepares a Trakt API request
+        /// </summary>
+        /// <param name="creds">Trakt credentials</param>
+        /// <param name="path">API path</param>
+        /// <param name="method"></param>
+        /// <returns></returns>
+        HttpRequest PrepareTraktRequest(TraktCredentials creds, string path, HttpMethod method = HttpMethod.GET);
+
+        /// <summary>
+        /// Fills or refreshes a <see cref="TraktCredentials"/> object with up to date OAuth
+        /// tokens.
+        /// </summary>
+        /// <param name="creds">The impartial or outdated credentials</param>
+        /// <param name="codeOrRefresh">Exchange or refresh code</param>
+        /// <param name="doRefresh">Are we performing a refresh request</param>
+        /// <returns></returns>
+        TraktCredentials FillOAuthTokens(TraktCredentials creds, string codeOrRefresh, bool doRefresh);
+    }
+
+    public class TraktAPIHelper : ITraktAPIHelper
     {
 
         private readonly string API_URL = "https://api.trakt.tv";
         private readonly string API_VERSION = "2";
 
         private readonly IConfigFileProvider cfgFileProvider;
+        private readonly IHttpClient http;
 
-        public TraktAPIHelper(IConfigFileProvider cfgFileProvider)
+        public TraktAPIHelper(IConfigFileProvider cfgFileProvider, IHttpClient http)
         {
             this.cfgFileProvider = cfgFileProvider;
+            this.http = http;
         }
 
         public HttpRequest PrepareTraktRequest(TraktCredentials creds, string path, HttpMethod method = HttpMethod.GET)
@@ -35,10 +70,6 @@ namespace NzbDrone.Core.TraktIntegration.API
             }
             return req;
         }
-
-        /// <summary>
-        /// Generates a URL to redirect the client to Trakt's OAuth2 endpoint.
-        /// </summary>
         public string ClientRedirectUri(OAuthState state)
         {
             var address = new HttpUri("https://trakt.tv/oauth/authorize")
@@ -49,10 +80,6 @@ namespace NzbDrone.Core.TraktIntegration.API
             return address.FullUri;
         }
 
-        /// <summary>
-        /// The redirection URL from OAuth's server back to our api.
-        /// </summary>
-        /// <returns></returns>
         public string ExchangeRedirectUri()
         {
             var port = cfgFileProvider.Port;
@@ -62,5 +89,52 @@ namespace NzbDrone.Core.TraktIntegration.API
             return $"http://localhost:{port}/api/traktcredentials/oauth?apikey={api_key}";
         }
 
+        public TraktCredentials FillOAuthTokens(TraktCredentials creds, string codeOrRefresh, bool doRefresh)
+        {
+            var oauthReq = PrepareTraktRequest(creds, "oauth/token", HttpMethod.POST);
+            switch (doRefresh)
+            {
+                case true:
+                    var refreshRequest = new OAuthAccessRefreshRequest()
+                    {
+                        ClientId = creds.ClientId,
+                        ClientSecret = creds.Secret,
+                        RefreshToken = codeOrRefresh,
+                        RedirectUri = ExchangeRedirectUri()
+                    };
+                    oauthReq.SetContent(refreshRequest.ToJson());
+                    break;
+                case false:
+                    var exchangeRequest = new OAuthCodeExchangeRequest()
+                    {
+                        ClientId = creds.ClientId,
+                        ClientSecret = creds.Secret,
+                        Code = codeOrRefresh,
+                        RedirectUri = ExchangeRedirectUri()
+                    };
+                    oauthReq.SetContent(exchangeRequest.ToJson());
+                    break;
+            }
+            var res = http.Execute(oauthReq);
+            if (res.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                throw new TraktException("Failed to obtain/refresh OAuth access token for Trakt credentials due to unknown error",
+                    new HttpException(res));
+            }
+            try
+            {
+                var tokens = Json.Deserialize<OAuthTokensResponse>(res.Content);
+                creds.AccessToken = tokens.AccessToken;
+                creds.RefreshToken = tokens.RefreshToken;
+                var lastRefreshTime = new DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc).AddSeconds(tokens.CreatedAt);
+                creds.LastRefreshDate = lastRefreshTime;
+                creds.ExpirationDate = lastRefreshTime.AddSeconds(tokens.ExpiresIn);
+                return creds;
+            }
+            catch (Newtonsoft.Json.JsonException ex)
+            {
+                throw new TraktException("Failed to deserialize OAuth response tokens", ex);
+            }
+        }
     }
 }

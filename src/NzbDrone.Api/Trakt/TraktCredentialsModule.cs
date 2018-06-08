@@ -25,10 +25,10 @@ namespace NzbDrone.Api.Trakt
     {
         private readonly ITraktCredentialsManager credsManager;
         private readonly Logger logger;
-        private readonly OAuthStateCrypto oauthStateCrypto;
-        private readonly TraktAPIHelper traktAPIHelper;
+        private readonly IOAuthStateCrypto oauthStateCrypto;
+        private readonly ITraktAPIHelper traktAPIHelper;
         public TraktCredentialsModule(ITraktCredentialsManager credsManager, Logger logger, TraktCredentialsResourceValidator validator,
-            OAuthStateCrypto oauthStateCrypto, TraktAPIHelper traktAPIHelper, IBroadcastSignalRMessage signalRBroadcaster) : base(signalRBroadcaster)
+            IOAuthStateCrypto oauthStateCrypto, ITraktAPIHelper traktAPIHelper, IBroadcastSignalRMessage signalRBroadcaster) : base(signalRBroadcaster)
         {
             this.credsManager = credsManager;
             this.logger = logger;
@@ -98,7 +98,7 @@ namespace NzbDrone.Api.Trakt
         // ID doesn't matter
         private void DeleteTraktCredentials(int obj)
         {
-            credsManager.DeleteExistingCredentials();
+            credsManager.DeleteCredentialsIfExists();
         }
     }
 }

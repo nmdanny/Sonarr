@@ -9,7 +9,38 @@ namespace NzbDrone.Core.Configuration
     /// and stored in the config table.
     /// </summary>
     /// <typeparam name="T">The type of object you wish to persist</typeparam>
-    public abstract class ConfigObjectStore<T> where T : class, new()
+    public interface IConfigObjectStore<T> where T : class, new()
+    {
+        /// <summary>
+        /// <para>Getter - Gets the object from memory, or null if it doesn't exist.</para>
+        /// <para>Setter - Sets the in-memory object and persists it to database, or erasing it if null.</para>
+        /// </summary>
+        T Item { get; set; }
+
+        /// <summary>
+        /// Deletes the object from the database. Equivalent to setting 'Item' to null.
+        /// </summary>
+        void Erase();
+
+        /// <summary>
+        /// Tries loading the object from the database into memory. Automatically called when
+        /// the store is initialized.
+        /// </summary>
+        /// <returns>Whether the object was loaded/existed in the database</returns>
+        bool Load();
+
+        /// <summary>
+        /// Persists the in-memory object to database. If it's null, it will be erased.
+        /// </summary>
+        void Save();
+
+        /// <summary>
+        /// Should model events(<see cref="ModelEvent{TModel}"/>) be published when creating, updating or deleting the Item?
+        /// </summary>
+        bool PublishModelEvents { get; }
+    }
+
+    public abstract class ConfigObjectStore<T> : IConfigObjectStore<T> where T : class, new()
     {
         private readonly IConfigRepository repo;
         private readonly IEventAggregator eventAggregator;
@@ -27,15 +58,8 @@ namespace NzbDrone.Core.Configuration
         /// </summary>
         protected abstract string ConfigKey { get; }
 
-        /// <summary>
-        /// Should model events(<see cref="ModelEvent{TModel}"/>) be published when creating, updating or deleting the Item?
-        /// </summary>
-        protected virtual bool PublishModelEvents => false;
+        public virtual bool PublishModelEvents => false;
 
-        /// <summary>
-        /// <para>Getter - Gets the object from memory, or null if it doesn't exist.</para>
-        /// <para>Setter - Sets the in-memory object and persists it to database, or erasing it if null.</para>
-        /// </summary>
         public T Item
         {
             get
@@ -55,11 +79,6 @@ namespace NzbDrone.Core.Configuration
             }
         }
 
-        /// <summary>
-        /// Tries loading the object from the database into memory. Automatically called when
-        /// the store is initialized.
-        /// </summary>
-        /// <returns>Whether the object was loaded/existed in the database</returns>
         public bool Load()
         {
             var cfgItem = repo.Get(ConfigKey);
@@ -71,9 +90,6 @@ namespace NzbDrone.Core.Configuration
             return false;
         }
 
-        /// <summary>
-        /// Persists the in-memory object to database. If it's null, it will be erased.
-        /// </summary>
         public void Save()
         {
             if (_object == null)
@@ -98,9 +114,6 @@ namespace NzbDrone.Core.Configuration
             }
         }
 
-        /// <summary>
-        /// Deletes the object from the database. Equivalent to setting 'Item' to null.
-        /// </summary>
         public void Erase()
         {
             _object = null;
